@@ -1,0 +1,65 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres
+    hostname: postgres
+    restart: always
+    env_file:
+      - postgresql/.env
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - 65432:5432
+    networks:
+      - dev_network
+
+  kafka:
+    image: bitnami/kafka:3
+    container_name: kafka
+    hostname: kafka
+    restart: always
+    env_file:
+      - kafka/.env
+    depends_on:
+      - zookeeper
+    ports:
+      - 9092:9092
+    networks:
+      - dev_network
+
+  zookeeper:
+    image: bitnami/zookeeper:3.8
+    container_name: zookeeper
+    hostname: zookeeper
+    restart: always
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+    ports:
+      - 2181:2181
+    networks:
+      - dev_network
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    image: mediapoint-api:latest
+    container_name: api
+    hostname: api
+    env_file:
+      - api/src/core/.env
+    volumes:
+      - ./api/alembic:/opt/alembic
+    ports:
+      - 8000:8000
+    depends_on:
+      - postgres
+      - kafka
+    networks:
+      - dev_network
+
+networks:
+  dev_network:
+
+volumes:
+  pg_data:
