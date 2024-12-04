@@ -48,6 +48,8 @@ services:
     hostname: api
     env_file:
       - api/src/core/.env
+    volumes:
+      - ./api/alembic:/opt/alembic
     ports:
       - 8000:8000
     depends_on:

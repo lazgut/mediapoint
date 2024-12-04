@@ -6,6 +6,12 @@ echo "Checking migrations"
 cd /opt || exit
 
 if /opt/app/env/bin/alembic check; then
+    echo "Migrations are up to date. Applying upgrades."
+    /opt/app/env/bin/alembic upgrade heads
+else
+    echo "Migrations are not up to date. Generating new migration."
+    /opt/app/env/bin/alembic revision --autogenerate -m "Auto-generated migration"
+    echo "Applying new migration."
     /opt/app/env/bin/alembic upgrade heads
 fi
 
